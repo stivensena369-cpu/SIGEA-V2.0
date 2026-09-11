@@ -137,12 +137,29 @@ QR-AIO-020,Todo-en-Uno,HP Pavilion 24 AIO,SN-HP-2201,sede-unigermana,amb-102,6,D
 1012,Carolina,Ospina,Aprendiz,carolina.ospina@aprendiz.edu.co,123456
 1013,Fernando,Guerrero,Instructor,fernando.guerrero@instituto.edu.co,`;
 
-  const handleLoadSampleCsv = () => {
-    if (csvEntity === 'activos') {
-      setCsvContent(sampleActivosCsv);
-    } else {
-      setCsvContent(sampleUsuariosCsv);
-    }
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = event => {
+      const text = event.target?.result as string;
+      if (text) {
+        setCsvContent(text);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDownloadTemplate = () => {
+    const content = csvEntity === 'activos' ? sampleActivosCsv : sampleUsuariosCsv;
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `plantilla_${csvEntity}_sigea.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleProcessCsv = (e: React.FormEvent) => {
@@ -646,22 +663,37 @@ QR-AIO-020,Todo-en-Uno,HP Pavilion 24 AIO,SN-HP-2201,sede-unigermana,amb-102,6,D
                 </div>
               </div>
 
+              {/* Input file para subir el CSV real directamente */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Cargar Archivo CSV desde el equipo:
+                </label>
+                <input
+                  type="file"
+                  accept=".csv,text/csv"
+                  onChange={handleFileUpload}
+                  className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-brand-900 file:text-white hover:file:bg-brand-800 cursor-pointer bg-slate-50 border border-slate-300 rounded-xl"
+                />
+              </div>
+
               <div>
                 <div className="flex justify-between items-center mb-1">
                   <label className="text-xs font-bold text-slate-700">
-                    Contenido CSV (Pega o escribe las filas con comas):
+                    O contenido CSV (Vista previa / Editor):
                   </label>
-                  <button
-                    type="button"
-                    onClick={handleLoadSampleCsv}
-                    className="text-xs font-bold text-brand-900 hover:underline flex items-center gap-1"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Cargar Plantilla de Ejemplo</span>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleDownloadTemplate}
+                      className="text-xs font-bold text-brand-900 hover:underline flex items-center gap-1"
+                    >
+                      <Download className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Descargar Plantilla de Ejemplo</span>
+                    </button>
+                  </div>
                 </div>
                 <textarea
-                  rows={8}
+                  rows={6}
                   value={csvContent}
                   onChange={e => setCsvContent(e.target.value)}
                   placeholder={
@@ -692,16 +724,16 @@ QR-AIO-020,Todo-en-Uno,HP Pavilion 24 AIO,SN-HP-2201,sede-unigermana,amb-102,6,D
               </div>
             </div>
 
-            {/* Helper Sidebar */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-3">
+            {/* Helper Sidebar - Con overflow-x-auto para evitar desbordamiento */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-3 overflow-hidden">
               <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
-                <FileSpreadsheet className="w-4 h-4 text-brand-900" />
+                <FileSpreadsheet className="w-4 h-4 text-brand-900 shrink-0" />
                 <span>Formato de Columnas Requerido</span>
               </h4>
               {csvEntity === 'activos' ? (
                 <div className="space-y-2 text-slate-600">
                   <p>Encabezados obligatorios para Activos:</p>
-                  <code className="block p-2 bg-white rounded border border-slate-200 text-[10px] font-mono text-slate-800">
+                  <code className="block p-2 bg-white rounded border border-slate-200 text-[10px] font-mono text-slate-800 overflow-x-auto whitespace-nowrap">
                     codigo_qr,tipo,marca,serial,sedeId,ambienteId,puestoNumero,estado
                   </code>
                   <p className="text-[11px] text-slate-500">
@@ -711,7 +743,7 @@ QR-AIO-020,Todo-en-Uno,HP Pavilion 24 AIO,SN-HP-2201,sede-unigermana,amb-102,6,D
               ) : (
                 <div className="space-y-2 text-slate-600">
                   <p>Encabezados obligatorios para Usuarios:</p>
-                  <code className="block p-2 bg-white rounded border border-slate-200 text-[10px] font-mono text-slate-800">
+                  <code className="block p-2 bg-white rounded border border-slate-200 text-[10px] font-mono text-slate-800 overflow-x-auto whitespace-nowrap">
                     documento,nombre,apellido,rol,email,fichaId
                   </code>
                   <p className="text-[11px] text-slate-500">
