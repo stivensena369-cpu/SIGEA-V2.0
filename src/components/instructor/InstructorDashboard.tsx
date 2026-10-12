@@ -26,7 +26,8 @@ import {
   Keyboard,
   Mouse,
   Cpu,
-  BookOpen
+  BookOpen,
+  History
 } from 'lucide-react';
 
 export const InstructorDashboard: React.FC = () => {
@@ -135,71 +136,59 @@ export const InstructorDashboard: React.FC = () => {
 
       {/* Instructor Active Class Control Center */}
       {activeClass && (
-        <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                <span className="bg-emerald-500 text-white font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider text-[10px]">
-                  Panel de Control del Instructor
-                </span>
-                <span className="text-white/70">Ficha: {activeClass.fichaId} (ADSO)</span>
-                <span className="text-white/50">•</span>
-                <span className="text-white/70">Clase #{activeClass.id}</span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${activeClass.estado === 'Finalizada' ? 'bg-slate-700 text-slate-300' : 'bg-emerald-500/30 text-emerald-300 border border-emerald-400/40'}`}>
-                  {activeClass.estado}
-                </span>
+        <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div className="flex items-center space-x-2">
+              <span className="bg-emerald-500 text-white font-bold px-3 py-1 rounded-full uppercase tracking-wider text-[10px]">
+                {activeClass.estado === 'Finalizada' ? 'Sesión Finalizada' : 'Sesión en Curso'}
+              </span>
+              <span className="text-white/80 font-medium">Ficha: {activeClass.fichaId} (ADSO)</span>
+            </div>
+            <span className="text-white/80 font-medium">Clase #{activeClass.id}</span>
+          </div>
+
+          <div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight">
+              {activeAmbiente?.nombre.split('-')[0] || 'Ambiente 101'} • {activeSede?.nombre.split('(')[0] || 'Sede CGMLTI'}
+            </h2>
+            <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-white/80">
+              <div className="flex items-center space-x-1.5">
+                <Clock className="w-4 h-4 text-emerald-400" />
+                <span>{activeClass.fecha} | {activeClass.hora_inicio} - {activeClass.hora_fin}</span>
               </div>
+              <div className="flex items-center space-x-1.5">
+                <Users className="w-4 h-4 text-emerald-400" />
+                <span>Estudiantes registrados: {completedStudents} de {totalStudents}</span>
+              </div>
+            </div>
+          </div>
 
-              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-                {activeClass.tema}
-              </h2>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs text-white/80">
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4 text-emerald-400" />
-                  <span>
-                    {activeAmbiente?.nombre.split('-')[0]} • {activeSede?.nombre.split('(')[0]}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-4 h-4 text-emerald-400" />
-                  <span>
-                    {activeClass.fecha} | {activeClass.hora_inicio} - {activeClass.hora_fin}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Users className="w-4 h-4 text-emerald-400" />
-                  <span>{totalStudents} Aprendices Matriculados</span>
-                </div>
+          {/* Métricas y botones de acción organizados */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center justify-around w-full md:w-auto md:space-x-10 text-center">
+              <div className="px-3 flex flex-col space-y-2">
+                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Escaneos Completos</span>
+                <span className="text-3xl font-black text-white my-1">{completedStudents}</span>
+                <span className="text-[10px] text-white/70">Verificados</span>
+              </div>
+              <div className="px-3 border-x border-white/15 flex flex-col space-y-2">
+                <span className="text-[10px] text-amber-300 font-bold uppercase tracking-wider">Escaneo Parcial</span>
+                <span className="text-3xl font-black text-white my-1">{inProgressStudents}</span>
+                <span className="text-[10px] text-white/70">En Proceso</span>
+              </div>
+              <div className="px-3 flex flex-col space-y-2">
+                <span className="text-[10px] text-red-300 font-bold uppercase tracking-wider">Sin Escanear</span>
+                <span className="text-3xl font-black text-white my-1">{pendingStudents}</span>
+                <span className="text-[10px] text-white/70">Pendientes</span>
               </div>
             </div>
 
-            {/* Quick Metrics Bar */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/20 text-center min-w-[110px]">
-                <span className="text-[10px] text-emerald-400 font-bold uppercase block">Verificados</span>
-                <span className="text-2xl font-black text-white">{completedStudents}</span>
-                <span className="text-[10px] text-white/70">Puestos 100%</span>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/20 text-center min-w-[110px]">
-                <span className="text-[10px] text-amber-300 font-bold uppercase block">En Escaneo</span>
-                <span className="text-2xl font-black text-white">{inProgressStudents}</span>
-                <span className="text-[10px] text-white/70">Parciales</span>
-              </div>
-
-              <div className="bg-white/10 backdrop-blur-md p-3.5 rounded-xl border border-white/20 text-center min-w-[110px]">
-                <span className="text-[10px] text-red-300 font-bold uppercase block">Sin Registro</span>
-                <span className="text-2xl font-black text-white">{pendingStudents}</span>
-                <span className="text-[10px] text-white/70">Pendientes</span>
-              </div>
-
-              {/* Finalize Class Action Button */}
+            <div className="flex flex-col w-full md:w-auto gap-2.5 shrink-0">
               {activeClass.estado !== 'Finalizada' && (
                 <button
                   type="button"
                   onClick={() => setShowFinalizeModal(true)}
-                  className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-lg transition-all flex items-center space-x-2 cursor-pointer ml-auto sm:ml-0"
+                  className="w-full px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer"
                 >
                   <CheckSquare className="w-4 h-4 text-white" />
                   <span>Finalizar Sesión de Clase</span>
@@ -211,18 +200,18 @@ export const InstructorDashboard: React.FC = () => {
       )}
 
       {/* Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-2 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-3 gap-3">
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setActiveTab('monitoreo')}
-            className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'monitoreo'
                 ? 'bg-brand-900 text-white shadow-md'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <Users className="w-4 h-4 text-emerald-400" />
-            <span>Monitoreo de Aprendices y Puestos</span>
+            <Users className="w-5 h-5 text-emerald-400 shrink-0" />
+            <span>Monitoreo de Aprendices</span>
             <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full ml-1">
               {totalStudents}
             </span>
@@ -230,13 +219,13 @@ export const InstructorDashboard: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('solicitudes')}
-            className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
+            className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all relative ${
               activeTab === 'solicitudes'
                 ? 'bg-brand-900 text-white shadow-md'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <RotateCcw className="w-4 h-4 text-emerald-400" />
+            <RotateCcw className="w-5 h-5 text-emerald-400 shrink-0" />
             <span>Solicitudes de Cambio</span>
             {pendingRequests.length > 0 && (
               <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full animate-bounce">
@@ -247,25 +236,25 @@ export const InstructorDashboard: React.FC = () => {
 
           <button
             onClick={() => setActiveTab('clases')}
-            className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'clases'
                 ? 'bg-brand-900 text-white shadow-md'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <Calendar className="w-4 h-4 text-emerald-400" />
+            <Calendar className="w-5 h-5 text-emerald-400 shrink-0" />
             <span>Historial de Mis Clases</span>
           </button>
 
           <button
             onClick={() => setActiveTab('novedades')}
-            className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center space-x-2.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'novedades'
                 ? 'bg-brand-900 text-white shadow-md'
                 : 'text-slate-600 hover:bg-slate-100'
             }`}
           >
-            <ShieldAlert className="w-4 h-4 text-emerald-400" />
+            <ShieldAlert className="w-5 h-5 text-emerald-400 shrink-0" />
             <span>Novedades del Aula</span>
           </button>
         </div>
@@ -275,9 +264,9 @@ export const InstructorDashboard: React.FC = () => {
             setReportTargetQr('');
             setReportModalOpen(true);
           }}
-          className="flex items-center justify-center space-x-1.5 text-xs text-red-800 bg-red-50 hover:bg-red-100 border border-red-300 px-3 py-1.5 rounded-xl font-semibold transition-colors self-start sm:self-auto"
+          className="flex items-center justify-center space-x-1.5 text-xs text-red-800 bg-red-50 hover:bg-red-100 border border-red-300 px-3 py-2 rounded-xl font-semibold transition-colors self-start sm:self-auto"
         >
-          <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
+          <ShieldAlert className="w-4 h-4 text-red-600" />
           <span>Reportar Daño / Falla</span>
         </button>
       </div>
@@ -285,29 +274,37 @@ export const InstructorDashboard: React.FC = () => {
       {/* TAB 1: LIVE ROSTER & ASSET MONITORING */}
       {activeTab === 'monitoreo' && (
         <div className="space-y-4">
-          {/* Filter Bar */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
-            <div className="relative w-full sm:w-80">
+          
+          <div className="mb-2">
+            <h3 className="text-base font-bold text-slate-900">Listado de Aprendices</h3>
+            <p className="text-xs text-slate-500">
+              Ficha: {activeClass?.fichaId} | Aula: {activeAmbiente?.nombre.split('-')[0]} | Jornada: Mañana
+            </p>
+          </div>
+
+          {/* Filter Bar & Leyenda */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <div className="relative w-full lg:w-80 shrink-0">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Buscar aprendiz por nombre o documento..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700"
+                className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-700"
               />
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-              <span className="font-semibold text-slate-700">Leyenda:</span>
-              <span className="flex items-center gap-1 text-emerald-700 font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" /> Puesto Completo
+            <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+              <span className="font-semibold text-slate-700">Estados:</span>
+              <span className="flex items-center gap-1.5 text-emerald-700 font-bold">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Escaneo completo
               </span>
-              <span className="flex items-center gap-1 text-amber-700 font-medium">
-                <span className="w-2 h-2 rounded-full bg-amber-500" /> En Registro
+              <span className="flex items-center gap-1.5 text-amber-700 font-bold">
+                <AlertTriangle className="w-4 h-4 text-amber-500" /> Escaneo parcial
               </span>
-              <span className="flex items-center gap-1 text-red-700 font-medium">
-                <span className="w-2 h-2 rounded-full bg-red-500" /> Sin Registro
+              <span className="flex items-center gap-1.5 text-red-700 font-bold">
+                <AlertCircle className="w-4 h-4 text-red-500" /> Sin escanear
               </span>
             </div>
           </div>
@@ -367,7 +364,7 @@ export const InstructorDashboard: React.FC = () => {
                       </div>
 
                       <span
-                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full border flex items-center space-x-1.5 ${
                           isComplete
                             ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
                             : hasSome
@@ -375,116 +372,199 @@ export const InstructorDashboard: React.FC = () => {
                             : 'bg-red-100 text-red-800 border-red-300'
                         }`}
                       >
-                        {isComplete
-                          ? '🟢 Puesto Completo'
-                          : hasSome
-                          ? `🟡 Parcial (${studentRegs.length}/${requiredCount})`
-                          : '🔴 Sin Registro'}
+                        {isComplete ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>Escaneo completo</span>
+                          </>
+                        ) : hasSome ? (
+                          <>
+                            <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                            <span>Escaneo parcial ({studentRegs.length}/{requiredCount})</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="w-3.5 h-3.5 text-red-600" />
+                            <span>El estudiante no ha escaneado</span>
+                          </>
+                        )}
                       </span>
                     </div>
 
-                    {/* Asset Checklist Status Matrix */}
-                    <div className="grid grid-cols-2 gap-2 my-3 text-xs">
+                    {/* Asset Checklist Status Matrix - Rediseñado en tarjetas verticales limpias */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3">
                       {/* Slot 1: Monitor / AIO */}
-                      <div
-                        className={`p-2 rounded-xl border flex items-center justify-between ${
-                          hasMonitor ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-400'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Monitor className="w-4 h-4" />
-                          <span className="font-semibold text-[11px]">
-                            {isAIO ? 'Todo-en-Uno' : 'Monitor'}
-                          </span>
+                      <div className={`p-3 rounded-xl border flex flex-col justify-between space-y-2 ${
+                        hasMonitor ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Monitor className={`w-4 h-4 ${hasMonitor ? 'text-emerald-700' : 'text-slate-400'}`} />
+                            <span className="font-semibold text-xs text-slate-800">
+                              {isAIO ? 'Todo-en-Uno' : 'Monitor'}
+                            </span>
+                          </div>
+                          {hasMonitor ? (
+                            <button
+                              onClick={() => {
+                                const a = activos.find(x => x.codigo_qr === hasMonitor.id_activo);
+                                if (a) setSelectedBadgeAsset(a);
+                              }}
+                              className="font-mono font-bold text-xs text-brand-900 hover:underline bg-white px-2 py-0.5 rounded border border-emerald-200"
+                            >
+                              {hasMonitor.id_activo}
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                              Pendiente
+                            </span>
+                          )}
                         </div>
-                        {hasMonitor ? (
-                          <button
-                            onClick={() => {
-                              const a = activos.find(x => x.codigo_qr === hasMonitor.id_activo);
-                              if (a) setSelectedBadgeAsset(a);
-                            }}
-                            className="font-mono font-bold text-[10px] text-brand-900 hover:underline"
-                          >
-                            {hasMonitor.id_activo}
-                          </button>
-                        ) : (
-                          <span className="text-[10px] text-red-500 font-semibold">Pendiente</span>
+
+                        {hasMonitor && (
+                          <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-[10px]">
+                            <span className="text-emerald-800/80 font-medium">Vinculado</span>
+                            <button
+                              onClick={() => {
+                                const a = activos.find(x => x.codigo_qr === hasMonitor.id_activo);
+                                if (a) setSelectedBadgeAsset(a);
+                              }}
+                              className="font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1 transition-colors"
+                            >
+                              <History className="w-3 h-3" />
+                              <span>Ver historial</span>
+                            </button>
+                          </div>
                         )}
                       </div>
 
                       {/* Slot 2: Teclado */}
-                      <div
-                        className={`p-2 rounded-xl border flex items-center justify-between ${
-                          hasKeyboard ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-400'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Keyboard className="w-4 h-4" />
-                          <span className="font-semibold text-[11px]">Teclado</span>
+                      <div className={`p-3 rounded-xl border flex flex-col justify-between space-y-2 ${
+                        hasKeyboard ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Keyboard className={`w-4 h-4 ${hasKeyboard ? 'text-emerald-700' : 'text-slate-400'}`} />
+                            <span className="font-semibold text-xs text-slate-800">Teclado</span>
+                          </div>
+                          {hasKeyboard ? (
+                            <button
+                              onClick={() => {
+                                const a = activos.find(x => x.codigo_qr === hasKeyboard.id_activo);
+                                if (a) setSelectedBadgeAsset(a);
+                              }}
+                              className="font-mono font-bold text-xs text-brand-900 hover:underline bg-white px-2 py-0.5 rounded border border-emerald-200"
+                            >
+                              {hasKeyboard.id_activo}
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                              Pendiente
+                            </span>
+                          )}
                         </div>
-                        {hasKeyboard ? (
-                          <button
-                            onClick={() => {
-                              const a = activos.find(x => x.codigo_qr === hasKeyboard.id_activo);
-                              if (a) setSelectedBadgeAsset(a);
-                            }}
-                            className="font-mono font-bold text-[10px] text-brand-900 hover:underline"
-                          >
-                            {hasKeyboard.id_activo}
-                          </button>
-                        ) : (
-                          <span className="text-[10px] text-red-500 font-semibold">Pendiente</span>
+
+                        {hasKeyboard && (
+                          <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-[10px]">
+                            <span className="text-emerald-800/80 font-medium">Vinculado</span>
+                            <button
+                              onClick={() => {
+                                const a = activos.find(x => x.codigo_qr === hasKeyboard.id_activo);
+                                if (a) setSelectedBadgeAsset(a);
+                              }}
+                              className="font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1 transition-colors"
+                            >
+                              <History className="w-3 h-3" />
+                              <span>Ver historial</span>
+                            </button>
+                          </div>
                         )}
                       </div>
 
                       {/* Slot 3: Ratón */}
-                      <div
-                        className={`p-2 rounded-xl border flex items-center justify-between ${
-                          hasMouse ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-400'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-2">
-                          <Mouse className="w-4 h-4" />
-                          <span className="font-semibold text-[11px]">Ratón</span>
+                      <div className={`p-3 rounded-xl border flex flex-col justify-between space-y-2 ${
+                        hasMouse ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200'
+                      }`}>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <Mouse className={`w-4 h-4 ${hasMouse ? 'text-emerald-700' : 'text-slate-400'}`} />
+                            <span className="font-semibold text-xs text-slate-800">Ratón</span>
+                          </div>
+                          {hasMouse ? (
+                            <button
+                              onClick={() => {
+                                const a = activos.find(x => x.codigo_qr === hasMouse.id_activo);
+                                if (a) setSelectedBadgeAsset(a);
+                              }}
+                              className="font-mono font-bold text-xs text-brand-900 hover:underline bg-white px-2 py-0.5 rounded border border-emerald-200"
+                            >
+                              {hasMouse.id_activo}
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                              Pendiente
+                            </span>
+                          )}
                         </div>
-                        {hasMouse ? (
-                          <button
-                            onClick={() => {
-                              const a = activos.find(x => x.codigo_qr === hasMouse.id_activo);
-                              if (a) setSelectedBadgeAsset(a);
-                            }}
-                            className="font-mono font-bold text-[10px] text-brand-900 hover:underline"
-                          >
-                            {hasMouse.id_activo}
-                          </button>
-                        ) : (
-                          <span className="text-[10px] text-red-500 font-semibold">Pendiente</span>
+
+                        {hasMouse && (
+                          <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-[10px]">
+                            <span className="text-emerald-800/80 font-medium">Vinculado</span>
+                            <button
+                              onClick={() => {
+                                const a = activos.find(x => x.codigo_qr === hasMouse.id_activo);
+                                if (a) setSelectedBadgeAsset(a);
+                              }}
+                              className="font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1 transition-colors"
+                            >
+                              <History className="w-3 h-3" />
+                              <span>Ver historial</span>
+                            </button>
+                          </div>
                         )}
                       </div>
 
-                      {/* Slot 4: Torre (if applicable) */}
+                      {/* Slot 4: Torre */}
                       {!isAIO && (
-                        <div
-                          className={`p-2 rounded-xl border flex items-center justify-between ${
-                            hasTower ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-400'
-                          }`}
-                        >
-                          <div className="flex items-center space-x-2">
-                            <Cpu className="w-4 h-4" />
-                            <span className="font-semibold text-[11px]">Torre CPU</span>
+                        <div className={`p-3 rounded-xl border flex flex-col justify-between space-y-2 ${
+                          hasTower ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200'
+                        }`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <Cpu className={`w-4 h-4 ${hasTower ? 'text-emerald-700' : 'text-slate-400'}`} />
+                              <span className="font-semibold text-xs text-slate-800">Torre CPU</span>
+                            </div>
+                            {hasTower ? (
+                              <button
+                                onClick={() => {
+                                  const a = activos.find(x => x.codigo_qr === hasTower.id_activo);
+                                  if (a) setSelectedBadgeAsset(a);
+                                }}
+                                className="font-mono font-bold text-xs text-brand-900 hover:underline bg-white px-2 py-0.5 rounded border border-emerald-200"
+                              >
+                                {hasTower.id_activo}
+                              </button>
+                            ) : (
+                              <span className="text-[10px] text-red-600 font-bold bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                                Pendiente
+                              </span>
+                            )}
                           </div>
-                          {hasTower ? (
-                            <button
-                              onClick={() => {
-                                const a = activos.find(x => x.codigo_qr === hasTower.id_activo);
-                                if (a) setSelectedBadgeAsset(a);
-                              }}
-                              className="font-mono font-bold text-[10px] text-brand-900 hover:underline"
-                            >
-                              {hasTower.id_activo}
-                            </button>
-                          ) : (
-                            <span className="text-[10px] text-red-500 font-semibold">Pendiente</span>
+
+                          {hasTower && (
+                            <div className="flex items-center justify-between pt-2 border-t border-emerald-200/60 text-[10px]">
+                              <span className="text-emerald-800/80 font-medium">Vinculado</span>
+                              <button
+                                onClick={() => {
+                                  const a = activos.find(x => x.codigo_qr === hasTower.id_activo);
+                                  if (a) setSelectedBadgeAsset(a);
+                                }}
+                                className="font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1 transition-colors"
+                              >
+                                <History className="w-3 h-3" />
+                                <span>Ver historial</span>
+                              </button>
+                            </div>
                           )}
                         </div>
                       )}
@@ -499,7 +579,6 @@ export const InstructorDashboard: React.FC = () => {
                         : 'Sin actividad en sesión'}
                     </span>
 
-                    {/* Authorize Change Button */}
                     <button
                       type="button"
                       onClick={() => handleAuthorizeChange(student.documento)}
@@ -589,7 +668,6 @@ export const InstructorDashboard: React.FC = () => {
           </p>
 
           <div className="space-y-3">
-            {/* Class 2 Finalized Demo */}
             <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 text-xs space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <span className="font-bold text-slate-900 text-sm">
