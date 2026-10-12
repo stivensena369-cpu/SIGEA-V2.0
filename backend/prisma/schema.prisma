@@ -1,0 +1,252 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"] // <-- AGREGA ESTA LÍNEA
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model activo {
+  id_activo           BigInt                @id @default(autoincrement())
+  codigo_barras       String                @unique(map: "activo_codigo_qr_key") @db.VarChar(150)
+  tipo                String                @db.VarChar(50)
+  marca               String?               @db.VarChar(100)
+  modelo              String?               @db.VarChar(100)
+  serial              String?               @unique @db.VarChar(100)
+  estado_actual       String                @db.VarChar(50)
+  fecha_registro      DateTime              @default(now()) @db.Timestamp(6)
+  fecha_baja          DateTime?             @db.Timestamp(6)
+  id_ambiente_actual  BigInt?
+  ambiente            ambiente?             @relation(fields: [id_ambiente_actual], references: [id_ambiente], map: "fk_activo_ambiente")
+  evidencia           evidencia[]
+  novedad_activo      novedad_activo[]
+  registro_uso_activo registro_uso_activo[]
+  reporte             reporte[]
+
+  @@index([id_ambiente_actual], map: "idx_activo_ambiente")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ambiente {
+  id_ambiente     BigInt            @id @default(autoincrement())
+  nombre          String            @db.VarChar(100)
+  codigo          String            @unique @db.VarChar(30)
+  capacidad       Int
+  tipo            String            @db.VarChar(50)
+  tiene_torre     Boolean           @default(false)
+  id_sede         BigInt
+  activo          activo[]
+  sede            sede              @relation(fields: [id_sede], references: [id_sede], map: "fk_ambiente_sede")
+  clase_formacion clase_formacion[]
+
+  @@index([id_sede], map: "idx_ambiente_sede")
+}
+
+model auditoria {
+  id_auditoria      BigInt       @id @default(autoincrement())
+  accion            String       @db.VarChar(100)
+  tabla_afectada    String       @db.VarChar(100)
+  registro_afectado BigInt?
+  fecha_hora        DateTime     @default(now()) @db.Timestamp(6)
+  ip_origen         String?      @db.Inet
+  id_registro       BigInt
+  registro_uso      registro_uso @relation(fields: [id_registro], references: [id_registro], map: "fk_auditoria_registro")
+
+  @@index([id_registro], map: "idx_auditoria_registro")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model clase_formacion {
+  id_clase                 BigInt                    @id @default(autoincrement())
+  fecha                    DateTime                  @db.Date
+  hora_inicio              DateTime                  @db.Time(6)
+  hora_fin                 DateTime                  @db.Time(6)
+  estado                   String                    @db.VarChar(50)
+  generada_automaticamente Boolean                   @default(true)
+  id_instructor            BigInt
+  id_ficha                 BigInt
+  id_ambiente              BigInt
+  ambiente                 ambiente                  @relation(fields: [id_ambiente], references: [id_ambiente], map: "fk_clase_ambiente")
+  ficha                    ficha                     @relation(fields: [id_ficha], references: [id_ficha], map: "fk_clase_ficha")
+  usuario                  usuario                   @relation(fields: [id_instructor], references: [id_usuario], map: "fk_clase_instructor")
+  evidencia                evidencia[]
+  novedad_activo           novedad_activo[]
+  registro_uso             registro_uso[]
+  solicitud_cambio_puesto  solicitud_cambio_puesto[]
+
+  @@index([id_ambiente], map: "idx_clase_ambiente")
+  @@index([id_ficha], map: "idx_clase_ficha")
+  @@index([id_instructor], map: "idx_clase_instructor")
+}
+
+model coordinacion {
+  id_coordinacion BigInt  @id @default(autoincrement())
+  nombre          String  @db.VarChar(150)
+  codigo          String  @unique @db.VarChar(30)
+  descripcion     String?
+  id_sede         BigInt
+  sede            sede    @relation(fields: [id_sede], references: [id_sede], map: "fk_coordinacion_sede")
+  ficha           ficha[]
+
+  @@index([id_sede], map: "idx_coordinacion_sede")
+}
+
+model evidencia {
+  id_evidencia    BigInt          @id @default(autoincrement())
+  ruta_archivo    String
+  descripcion     String?
+  fecha_hora      DateTime        @default(now()) @db.Timestamp(6)
+  id_clase        BigInt
+  id_activo       BigInt
+  activo          activo          @relation(fields: [id_activo], references: [id_activo], map: "fk_evidencia_activo")
+  clase_formacion clase_formacion @relation(fields: [id_clase], references: [id_clase], map: "fk_evidencia_clase")
+
+  @@index([id_activo], map: "idx_evidencia_activo")
+  @@index([id_clase], map: "idx_evidencia_clase")
+}
+
+model ficha {
+  id_ficha           BigInt             @id @default(autoincrement())
+  codigo             String             @unique @db.VarChar(30)
+  jornada            String             @db.VarChar(50)
+  id_programa        BigInt
+  id_coordinacion    BigInt
+  clase_formacion    clase_formacion[]
+  coordinacion       coordinacion       @relation(fields: [id_coordinacion], references: [id_coordinacion], map: "fk_ficha_coordinacion")
+  programa_formacion programa_formacion @relation(fields: [id_programa], references: [id_programa], map: "fk_ficha_programa")
+  usuario_ficha      usuario_ficha[]
+
+  @@index([id_coordinacion], map: "idx_ficha_coordinacion")
+  @@index([id_programa], map: "idx_ficha_programa")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model novedad_activo {
+  id_novedad       BigInt           @id @default(autoincrement())
+  id_activo        BigInt
+  reportado_por    BigInt
+  rol_reportante   String?          @db.VarChar(20)
+  id_clase         BigInt?
+  fecha_reporte    DateTime?        @default(now()) @db.Timestamp(6)
+  tipo_novedad     String?          @db.VarChar(30)
+  descripcion      String
+  prioridad        String?          @default("Media") @db.VarChar(10)
+  estado           String?          @default("Abierta") @db.VarChar(20)
+  fecha_resolucion DateTime?        @db.Timestamp(6)
+  activo           activo           @relation(fields: [id_activo], references: [id_activo], onDelete: Cascade, onUpdate: NoAction, map: "fk_nov_activo")
+  clase_formacion  clase_formacion? @relation(fields: [id_clase], references: [id_clase], onUpdate: NoAction, map: "fk_nov_clase")
+  usuario          usuario          @relation(fields: [reportado_por], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "fk_nov_usuario")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model programa_formacion {
+  id_programa    BigInt  @id @default(autoincrement())
+  nombre         String  @db.VarChar(200)
+  codigo         String  @unique @db.VarChar(50)
+  duracion_horas Int
+  ficha          ficha[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model registro_uso {
+  id_registro         BigInt                @id @default(autoincrement())
+  fecha_hora_registro DateTime              @default(now()) @db.Timestamp(6)
+  fecha_hora_fin      DateTime?             @db.Timestamp(6)
+  id_usuario          BigInt
+  id_clase            BigInt
+  auditoria           auditoria[]
+  clase_formacion     clase_formacion       @relation(fields: [id_clase], references: [id_clase], map: "fk_registro_uso_clase")
+  usuario             usuario               @relation(fields: [id_usuario], references: [id_usuario], map: "fk_registro_uso_usuario")
+  registro_uso_activo registro_uso_activo[]
+  reporte             reporte[]
+
+  @@index([id_clase], map: "idx_registro_uso_clase")
+  @@index([id_usuario], map: "idx_registro_uso_usuario")
+}
+
+model registro_uso_activo {
+  id_registro    BigInt
+  id_activo      BigInt
+  estado_inicial String       @db.VarChar(50)
+  estado_final   String       @db.VarChar(50)
+  activo         activo       @relation(fields: [id_activo], references: [id_activo], map: "fk_uso_activo_activo")
+  registro_uso   registro_uso @relation(fields: [id_registro], references: [id_registro], onDelete: Cascade, map: "fk_uso_activo_registro")
+
+  @@id([id_registro, id_activo], map: "pk_registro_uso_activo")
+  @@index([id_activo], map: "idx_registro_uso_activo_activo")
+}
+
+model reporte {
+  id_reporte   BigInt       @id @default(autoincrement())
+  descripcion  String
+  tipo         String       @db.VarChar(50)
+  fecha_hora   DateTime     @default(now()) @db.Timestamp(6)
+  resuelto     Boolean      @default(false)
+  id_registro  BigInt
+  id_activo    BigInt
+  activo       activo       @relation(fields: [id_activo], references: [id_activo], map: "fk_reporte_activo")
+  registro_uso registro_uso @relation(fields: [id_registro], references: [id_registro], map: "fk_reporte_registro")
+
+  @@index([id_activo], map: "idx_reporte_activo")
+  @@index([id_registro], map: "idx_reporte_registro")
+}
+
+model sede {
+  id_sede      BigInt         @id @default(autoincrement())
+  nombre       String         @db.VarChar(100)
+  direccion    String         @db.VarChar(200)
+  codigo       String         @unique @db.VarChar(30)
+  descripcion  String?
+  ambiente     ambiente[]
+  coordinacion coordinacion[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model solicitud_cambio_puesto {
+  id_solicitud                                           BigInt          @id @default(autoincrement())
+  id_aprendiz                                            BigInt
+  id_clase                                               BigInt
+  motivo                                                 String
+  estado                                                 String?         @default("Pendiente") @db.VarChar(20)
+  fecha_solicitud                                        DateTime?       @default(now()) @db.Timestamp(6)
+  fecha_respuesta                                        DateTime?       @db.Timestamp(6)
+  id_instructor                                          BigInt?
+  usuario_solicitud_cambio_puesto_id_aprendizTousuario   usuario         @relation("solicitud_cambio_puesto_id_aprendizTousuario", fields: [id_aprendiz], references: [id_usuario], onDelete: Cascade, onUpdate: NoAction, map: "fk_sol_aprendiz")
+  clase_formacion                                        clase_formacion @relation(fields: [id_clase], references: [id_clase], onDelete: Cascade, onUpdate: NoAction, map: "fk_sol_clase")
+  usuario_solicitud_cambio_puesto_id_instructorTousuario usuario?        @relation("solicitud_cambio_puesto_id_instructorTousuario", fields: [id_instructor], references: [id_usuario], onUpdate: NoAction, map: "fk_sol_instructor")
+}
+
+model usuario {
+  id_usuario                                                             BigInt                    @id @default(autoincrement())
+  documento                                                              String                    @unique @db.VarChar(30)
+  nombres                                                                String                    @db.VarChar(100)
+  apellidos                                                              String                    @db.VarChar(100)
+  email                                                                  String                    @unique @db.VarChar(150)
+  password_hash                                                          String
+  rol                                                                    String                    @db.VarChar(50)
+  fecha_registro                                                         DateTime                  @default(now()) @db.Timestamp(6)
+  activo                                                                 Boolean                   @default(true)
+  clase_formacion                                                        clase_formacion[]
+  novedad_activo                                                         novedad_activo[]
+  registro_uso                                                           registro_uso[]
+  solicitud_cambio_puesto_solicitud_cambio_puesto_id_aprendizTousuario   solicitud_cambio_puesto[] @relation("solicitud_cambio_puesto_id_aprendizTousuario")
+  solicitud_cambio_puesto_solicitud_cambio_puesto_id_instructorTousuario solicitud_cambio_puesto[] @relation("solicitud_cambio_puesto_id_instructorTousuario")
+  usuario_ficha                                                          usuario_ficha[]
+}
+
+model usuario_ficha {
+  id_usuficha BigInt  @id @default(autoincrement())
+  codigo      String? @db.VarChar(50)
+  id_usuario  BigInt
+  id_ficha    BigInt
+  ficha       ficha   @relation(fields: [id_ficha], references: [id_ficha], onDelete: Cascade, map: "fk_usuario_ficha_ficha")
+  usuario     usuario @relation(fields: [id_usuario], references: [id_usuario], onDelete: Cascade, map: "fk_usuario_ficha_usuario")
+
+  @@unique([id_usuario, id_ficha], map: "uq_usuario_ficha")
+  @@index([id_ficha], map: "idx_usuario_ficha_ficha")
+  @@index([id_usuario], map: "idx_usuario_ficha_usuario")
+}

@@ -1,0 +1,37 @@
+services:
+  sigea-db:
+    image: postgres:16
+    container_name: sigea-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgresql
+      POSTGRES_DB: SIGEA
+    ports:
+      - "5435:5432"
+    volumes:
+      - sigea-postgres-data:/var/lib/postgresql/data
+    networks:
+      - sigea-network
+
+  sigea-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sigea-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./backend/.env.docker
+    depends_on:
+      - sigea-db
+    networks:
+      - sigea-network
+
+volumes:
+  sigea-postgres-data:
+
+networks:
+  sigea-network:
+    driver: bridge

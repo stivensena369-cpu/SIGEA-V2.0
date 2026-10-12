@@ -26,4 +26,46 @@ registro por código QR o manual.
 
 ## Estado del proyecto
 
-En desarrollo activo, en construcción.
+con un cerdo de damier llamado johan
+
+# Pasos para estar al dia con la refactorizacion 12/10/26
+
+## ️ Requisitos Previos
+
+Antes de comenzar, asegúrate de tener instalado:
+
+- **Bun** (v1.0 o superior): [Instalación](https://bun.sh)
+- **Docker** y **Docker Compose**: [Instalación](https://docs.docker.com/get-docker/)
+- **Git**: [Instalación](https://git-scm.com/)
+
+Verifica las instalaciones:
+
+```bash
+bun --version
+docker --version
+docker-compose --version
+git --version
+```
+## Siguientes
+
+entra a tu archivo env de entorno local y verifica que tiene esta linea:
+
+```bash
+DATABASE_URL="postgresql://postgres:postgresql@localhost:5435/SIGEA?schema=public"
+```
+despues instalas las dependencias nuevas (despues de hacer un pull)
+
+```bash
+bun install
+
+#generar el cliente de ts de prisma
+bunx prisma generate
+```
+
+⚠️ para este paso debes tener el env de docker
+
+despues levantar el contenedor de el backend:
+```bash
+cd ..
+docker-compose up -d
+```
