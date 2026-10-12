@@ -1,4 +1,8 @@
-# SIGEA-platform
+# REGLA DE ORO
+
+ninguna capa sabe de la existencia de la otra, solo se comunican entre si.
+
+## SIGEA-platform
 
 Sistema Integral de Gestión de Entornos y Activos, desarrollado para el SENA.
 Administra el uso de activos tecnológicos (monitor, teclado, mouse, torre)
@@ -20,8 +24,8 @@ registro por código QR o manual.
 
 ## Equipo
 
-- Stiven - Lider Backend
-- Sebastian - Lider BD
+- Camilo - Scrum Master
+- Stiven - Lider Backend 
 - Astrid - Lider Frontend
 
 ## Estado del proyecto
