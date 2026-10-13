@@ -1,0 +1,35 @@
+# Variables de entorno (NUNCA commitear)
+.env
+.env.docker
+.env.local
+
+# Dependencias (se reinstalan con bun install)
+node_modules/
+
+# Archivos de build
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# El lock de npm NO se usa porque usamos Bun
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# SÍ commiteamos:
+# ✅ bun.lock (o bun.lockb)
+# ✅ package.json
+# ✅ tsconfig.json
+# ✅ prisma/schema.prisma
