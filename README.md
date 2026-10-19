@@ -24,7 +24,6 @@ registro por código QR o manual.
 
 ## Equipo
 
-- Camilo - Scrum Master
 - Stiven - Lider Backend 
 - Astrid - Lider Frontend
 
